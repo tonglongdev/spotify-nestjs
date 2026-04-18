@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Song } from 'src/types/song';
 
 @Injectable()
 export class SongsService {
-  private readonly songs: string[] = [];
+  private readonly songs: Song[] = [];
 
-  create(song: string) {
+  create(song: Song) {
     // Save the song in the database
     this.songs.push(song);
     return this.songs;
