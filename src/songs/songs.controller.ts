@@ -1,27 +1,57 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Delete,
+  Post,
+  HttpException,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Body,
+} from '@nestjs/common';
 import { SongsService } from './songs.service';
+import { CreateSongDTO } from './dto/create-song-dto';
 
 @Controller('songs')
 export class SongsController {
   constructor(private songsService: SongsService) {}
+  @Post()
+  create(@Body() createSongDTO: CreateSongDTO) {
+    return this.songsService.create(createSongDTO);
+  }
   @Get()
   findAll() {
-    return this.songsService.findAll();
+    try {
+      return this.songsService.findAll();
+    } catch (e) {
+      throw new HttpException(
+        'server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          cause: e,
+        },
+      );
+    }
   }
   @Get(':id')
-  findOne() {
-    return 'This action returns a single song';
+  findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
+  ) {
+    return `fetch song on the based on id ${typeof id}`;
   }
-  @Post('')
-  create() {
-    return this.songsService.create('Animals by Martin Garrix');
-  }
+
   @Put(':id')
   update() {
-    return 'This action updates a single song';
+    return 'update song on the based on id';
   }
+
   @Delete(':id')
-  remove() {
-    return 'This action removes a single song';
+  delete() {
+    return 'delete song on the based on id';
   }
 }
