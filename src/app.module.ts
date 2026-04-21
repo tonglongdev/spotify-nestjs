@@ -1,30 +1,28 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { Song } from './songs/song.entity';
 import { SongsController } from './songs/songs.controller';
 import { SongsModule } from './songs/songs.module';
-import { DevConfigService } from './common/providers/DevConfigService';
-
-const devConfig = { port: 3000 };
-const proConfig = { port: 4000 };
 
 @Module({
-  imports: [SongsModule],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: DevConfigService,
-      useClass: DevConfigService,
-    },
-    {
-      provide: 'CONFIG',
-      useFactory: () => {
-        return process.env.NODE_ENV === 'development' ? devConfig : proConfig;
-      },
-    },
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      database: 'spotify-nestjs',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'admin123',
+      entities: [Song],
+      synchronize: true,
+    }),
+    SongsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
